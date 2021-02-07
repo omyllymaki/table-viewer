@@ -7,6 +7,7 @@ from PyQt5.QtWidgets import QWidget
 from pandas.core.dtypes.common import is_string_dtype
 
 from dataframe_model import DataFrameModel
+from filtering import filter_by_query
 
 
 class Table(QWidget):
@@ -55,11 +56,14 @@ class Table(QWidget):
         self._render_table()
 
     def _handle_filtering_changed(self):
-        self.filtering_text = self.filter_line.text()
-        mask = np.column_stack([self.data[col].str.contains(self.filtering_text, na=False,  flags=re.IGNORECASE)
-                                for col in self.data.columns
-                                if is_string_dtype(self.data[col])])
-        self.filtered_data = self.data.loc[mask.any(axis=1)]
+        self.query = self.filter_line.text()
+        try:
+            self.filtered_data = filter_by_query(self.data, self.query)
+            self._set_filter_line_background_white()
+        except Exception as e:
+            print(e)
+            self._set_filter_line_background_red()
+
         self._group_data()
         self._render_table()
 
@@ -85,3 +89,15 @@ class Table(QWidget):
             table_data_sorted = table_data.sort_values(sort_col_name, ascending=self.ascending)
             model = DataFrameModel(table_data_sorted)
             self.table_view.setModel(model)
+
+    def _set_filter_line_background_red(self):
+        self.filter_line.setStyleSheet("QLineEdit"
+                           "{"
+                           "background : red;"
+                           "}")
+
+    def _set_filter_line_background_white(self):
+        self.filter_line.setStyleSheet("QLineEdit"
+                           "{"
+                           "background : white;"
+                           "}")
