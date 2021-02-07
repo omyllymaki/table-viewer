@@ -1,10 +1,7 @@
-import re
-
-import numpy as np
 from PyQt5 import QtWidgets
-from PyQt5.QtWidgets import QVBoxLayout, QComboBox, QLineEdit, QHBoxLayout
+from PyQt5.QtCore import Qt
+from PyQt5.QtWidgets import QVBoxLayout, QComboBox, QLineEdit, QHBoxLayout, QAbstractItemView
 from PyQt5.QtWidgets import QWidget
-from pandas.core.dtypes.common import is_string_dtype
 
 from dataframe_model import DataFrameModel
 from filtering import filter_by_query
@@ -46,8 +43,19 @@ class Table(QWidget):
 
     def _set_connections(self):
         self.grouping_option_selector.currentIndexChanged.connect(self._grouping_option_changed)
-        self.header.sectionClicked.connect(self._handle_header_clicked)
         self.filter_line.returnPressed.connect(self._handle_filtering_changed)
+
+        self.header.sectionClicked.connect(self._handle_header_clicked)
+        self.header.setContextMenuPolicy(Qt.CustomContextMenu)
+        self.header.customContextMenuRequested.connect(self._handle_header_right_clicked)
+        self.header.setSelectionMode(QAbstractItemView.SingleSelection)
+
+    def _handle_header_right_clicked(self, position):
+        index = self.header.logicalIndexAt(position)
+        column_name = self.grouped_data.columns[index]
+        current_text = self.filter_line.text()
+        new_text = current_text + " [" + column_name + "]"
+        self.filter_line.setText(new_text)
 
     def _grouping_option_changed(self):
         self.group_by = self.grouping_option_selector.currentText()
@@ -92,12 +100,12 @@ class Table(QWidget):
 
     def _set_filter_line_background_red(self):
         self.filter_line.setStyleSheet("QLineEdit"
-                           "{"
-                           "background : red;"
-                           "}")
+                                       "{"
+                                       "background : red;"
+                                       "}")
 
     def _set_filter_line_background_white(self):
         self.filter_line.setStyleSheet("QLineEdit"
-                           "{"
-                           "background : white;"
-                           "}")
+                                       "{"
+                                       "background : white;"
+                                       "}")

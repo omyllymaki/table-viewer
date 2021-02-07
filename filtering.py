@@ -7,23 +7,20 @@ from pandas.core.dtypes.common import is_string_dtype
 
 def filter_by_query(df: pd.DataFrame, query: str) -> pd.DataFrame:
     """
-    Example queries:
+    Query syntax:
+    [col1, col2]: search from col1 and col2.
+    &&: logical and, returns intersection.
+    ||: logical or, returns union.
 
-    query = tampere
-    Search "tampere" from all columns
-    
-    query = fin*
-    Search "fin*" from all columns
+    [col1, col2] regxp1 && regxp2 || [col3] regexp3
 
-    query = [Lives, Born] tampere
-    Search "tampere" from columns Lives and Born
+    means that
 
-    query = [Lives, Born] tampere | [Nationality] finland
-    Search "tampere" from columns Lives and Born or "finland" from column Nationality; return union.
-
-    query = "[Lives, Born] tampere & [Nationality] finland"
-    Search "tampere" from columns Lives and Born and "finland" from column Nationality; return interception.
-
+    search regexp1 pattern from col1 and col2
+    AND
+    search regexp2 from every column
+    OR
+    search regexp3 pattern from col3
     """
 
     if not query:
@@ -31,33 +28,33 @@ def filter_by_query(df: pd.DataFrame, query: str) -> pd.DataFrame:
 
     all_cols = df.columns.tolist()
 
-    operators_pattern = "&|\|"
-    splitted = re.split(operators_pattern, query)
-    operators = re.findall(operators_pattern, query)
-    operators = [None] + operators
+    operators_pattern = "&&|\|\|"  # && or ||
+    sub_queries = re.split(operators_pattern, query)
+    logical_operators = [None] + re.findall(operators_pattern, query)
 
     boolean_vectors = []
-    pattern = None
-    for operation, term in zip(operators, splitted):
-        sub_terms = term.split()
-        col_candidates = []
-        for t in sub_terms:
-            if t.startswith("[") and t.endswith("]"):
-                col_candidates += [s.strip() for s in t[1:-1].split(",")]
+    search_pattern = None
+    for sub_query in sub_queries:
+        sub_terms = sub_query.split()
+        column_candidates = []
+        for term in sub_terms:
+            is_column_name = term.startswith("[") and term.endswith("]")
+            if is_column_name:
+                column_candidates += [s.strip() for s in term[1:-1].split(",")]
             else:
-                pattern = t.strip()
+                search_pattern = term.strip()
 
-        if len(col_candidates) == 0:
+        if len(column_candidates) == 0:
             cols = all_cols
         else:
             cols = []
-            for cc in col_candidates:
+            for cc in column_candidates:
                 if cc in all_cols:
                     cols.append(cc)
                 else:
-                    raise Exception(f"{cc} is not a valid column")
+                    raise Exception(f"{cc} is not a valid column. Please modify query.")
 
-        mask = np.column_stack([df[col].str.contains(pattern, na=False, flags=re.IGNORECASE)
+        mask = np.column_stack([df[col].str.contains(search_pattern, na=False, flags=re.IGNORECASE)
                                 for col in cols
                                 if is_string_dtype(df[col])])
 
@@ -65,16 +62,16 @@ def filter_by_query(df: pd.DataFrame, query: str) -> pd.DataFrame:
         boolean_vectors.append(boolean_vector)
 
     is_match = None
-    for b, operation in zip(boolean_vectors, operators):
+    for boolean_vector, operation in zip(boolean_vectors, logical_operators):
         if operation is None:
-            is_match = b
+            is_match = boolean_vector
         else:
-            if operation == "|":
-                is_match = is_match | b
-            elif operation == "&":
-                is_match = is_match & b
+            if operation == "||":
+                is_match = is_match | boolean_vector
+            elif operation == "&&":
+                is_match = is_match & boolean_vector
             else:
-                raise Exception(f"Unknown operation: {operation}")
+                raise Exception(f"Unknown logical operator: {operation}")
 
     df_filtered = df[is_match]
     return df_filtered
