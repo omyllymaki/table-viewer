@@ -9,7 +9,6 @@ class MainWindow(QMainWindow):
     def __init__(self, data: pd.DataFrame):
         super().__init__(flags=Qt.Window)
         self.setWindowTitle('Table viewer')
-        print(data.shape)
         self.table = Table(data)
         self.setCentralWidget(self.table)
-
+        self.showMaximized()
