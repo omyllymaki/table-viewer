@@ -8,6 +8,7 @@ from filtering import filter_by_query
 
 
 class Table(QWidget):
+    grouping_options = ["sum", "mean", "median", "count"]
 
     def __init__(self, data):
         super().__init__()
@@ -17,13 +18,14 @@ class Table(QWidget):
         self.table_view = QtWidgets.QTableView()
         self.table_view.setObjectName("tableView")
         self.grouping_option_selector = QComboBox()
-        self.grouping_option_selector.addItems(["None"] + list(self.data.columns))
+        self.grouping_option_selector.addItems(self.grouping_options)
         self.filter_line = QLineEdit(self)
         self.header = self.table_view.horizontalHeader()
-        self.group_by = "None"
-        self.grouped_data = None
+        self.group_by = None
+        self.table_data = None
         self.sort_col_index = 0
         self.ascending = True
+        self.grouping_function = self.grouping_options[0]
 
         self._set_layout()
         self._set_connections()
@@ -52,14 +54,15 @@ class Table(QWidget):
 
     def _handle_header_right_clicked(self, position):
         index = self.header.logicalIndexAt(position)
-        column_name = self.grouped_data.columns[index]
-        current_text = self.filter_line.text()
-        new_text = current_text + " [" + column_name + "]"
-        self.filter_line.setText(new_text)
+        if self.group_by is None:
+            self.group_by = self.table_data.columns[index]
+        else:
+            self.group_by = None
+        self._group_data()
+        self._render_table()
 
     def _grouping_option_changed(self):
-        self.group_by = self.grouping_option_selector.currentText()
-        self.sort_col_index = 0
+        self.grouping_function = self.grouping_option_selector.currentText()
         self._group_data()
         self._render_table()
 
@@ -82,20 +85,24 @@ class Table(QWidget):
             self.ascending = True
         else:
             self.ascending = False
+        self._sort_table()
         self._render_table()
 
     def _group_data(self):
-        if self.group_by == "None":
-            self.grouped_data = self.filtered_data.copy()
+        if self.group_by is None:
+            self.table_data = self.filtered_data.copy()
         else:
-            self.grouped_data = self.filtered_data.groupby(self.group_by, as_index=False).sum()
+            self.table_data = self.filtered_data \
+                .groupby(self.group_by, as_index=False) \
+                .agg(self.grouping_function)
+
+    def _sort_table(self):
+        sort_col_name = self.table_data.columns[self.sort_col_index]
+        self.table_data = self.table_data.sort_values(sort_col_name, ascending=self.ascending)
 
     def _render_table(self):
-        if self.grouped_data is not None:
-            table_data = self.grouped_data
-            sort_col_name = table_data.columns[self.sort_col_index]
-            table_data_sorted = table_data.sort_values(sort_col_name, ascending=self.ascending)
-            model = DataFrameModel(table_data_sorted)
+        if self.table_data is not None:
+            model = DataFrameModel(self.table_data)
             self.table_view.setModel(model)
 
     def _set_filter_line_background_red(self):

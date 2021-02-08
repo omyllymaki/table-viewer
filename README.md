@@ -1,10 +1,10 @@
 # table-viewer
 
-Simple utility program for viewing, filtering, grouping, and sorting of tabular data.
+Simple utility program, with minimal GUI, for viewing, filtering, grouping, and sorting tabular data.
 
-## Usage
+# Usage
 
-Basic usage:
+## Running program
 
 ```
 python main.py --path path1 path2 path3 
@@ -22,18 +22,26 @@ For more detailed usage, see
 python main.py -h
 ```
 
-**Queries**
+## GUI operations
 
+Left click header: sort by column
+
+Right click header: group by column / reverse grouping
+
+**Search**
 
 Syntax:
 
-* [col1, col2]: search from col1 and col2.
-* &&: logical AND, returns intersection.
-* ||: logical OR, returns union.
+- **regxp** : search regexp from all columns.
+- **[col1, col2] regxp** : search regexp from columns col1 and col2.
+- **&&** : logical AND, returns intersection.
+- **||** : logical OR, returns union.
 
 Example:
 
-[col1, col2] regxp1 && regxp2 || [col3] regexp3
+query = [Lives, Born] tam* || [Nationality] fin
+
+Looks pattern "tam*" from columns [Lives, Born] or pattern "fin" from columns [Nationalioty]; returns union of these. 
 
 See query_examples.py file for more examples.
 
