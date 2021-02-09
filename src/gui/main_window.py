@@ -1,8 +1,9 @@
 from PyQt5.QtCore import Qt
 from PyQt5.QtWidgets import QMainWindow
 
-from table_widget import Table
 import pandas as pd
+
+from src.gui.table_widget import Table
 
 
 class MainWindow(QMainWindow):

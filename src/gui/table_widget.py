@@ -3,8 +3,8 @@ from PyQt5.QtCore import Qt
 from PyQt5.QtWidgets import QVBoxLayout, QComboBox, QLineEdit, QHBoxLayout, QAbstractItemView
 from PyQt5.QtWidgets import QWidget
 
-from dataframe_model import DataFrameModel
-from filtering import filter_by_query
+from src.filtering import filter_by_query
+from src.gui.dataframe_model import DataFrameModel
 
 
 class Table(QWidget):

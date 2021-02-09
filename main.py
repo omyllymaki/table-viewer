@@ -2,11 +2,12 @@ import sys
 import tkinter.filedialog
 from tkinter import filedialog
 
-import pandas as pd
 from PyQt5.QtWidgets import QApplication
 
-from main_window import MainWindow
-from parsing import init_parser, get_file_paths
+from src.data_loading import load_data
+from src.gui.main_window import MainWindow
+from src.parsing import init_parser
+from src.utils import get_file_paths
 
 parser = init_parser()
 
@@ -19,18 +20,7 @@ if args.path is None:
 else:
     file_paths = get_file_paths(args.path, args.extension, args.recursive)
 
-df_list = []
-for path in file_paths:
-    df = pd.read_csv(path,
-                     sep=args.separator,
-                     header=args.header,
-                     decimal=args.decimal,
-                     parse_dates=args.datetime,
-                     infer_datetime_format=True)
-    df_list.append(df)
-data = pd.concat(df_list)
-
-print(data.shape)
+data = load_data(file_paths, args)
 
 app = QApplication(sys.argv)
 mw = MainWindow(data)

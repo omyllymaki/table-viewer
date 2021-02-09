@@ -1,7 +1,7 @@
 import pandas as pd
 from tabulate import tabulate
 
-from filtering import filter_by_query
+from src.filtering import filter_by_query
 
 df = pd.read_csv("test_data/simple_test_data.csv")
 
