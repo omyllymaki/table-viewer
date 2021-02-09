@@ -9,20 +9,26 @@ from src.gui.main_window import MainWindow
 from src.parsing import init_parser
 from src.utils import get_file_paths
 
-parser = init_parser()
 
-args = parser.parse_args()
+def main():
+    parser = init_parser()
 
-if args.path is None:
-    root = tkinter.Tk()
-    file_paths = filedialog.askopenfilenames(parent=root, title='Choose files for viewing')
-    root.destroy()
-else:
-    file_paths = get_file_paths(args.path, args.extension, args.recursive)
+    args = parser.parse_args()
 
-data = load_data(file_paths, args)
+    if args.path is None:
+        root = tkinter.Tk()
+        file_paths = filedialog.askopenfilenames(parent=root, title='Choose files for viewing')
+        root.destroy()
+    else:
+        file_paths = get_file_paths(args.path, args.extension, args.recursive)
 
-app = QApplication(sys.argv)
-mw = MainWindow(data)
-mw.show()
-app.exec()
+    data = load_data(file_paths, args)
+
+    app = QApplication(sys.argv)
+    mw = MainWindow(data)
+    mw.show()
+    app.exec()
+
+
+if __name__ == "__main__":
+    main()
