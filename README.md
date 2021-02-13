@@ -26,7 +26,9 @@ python main.py -h
 
 Left click header: sort by column
 
-Right click header: group by column / reverse grouping
+Right click header: group by column or reverse grouping
+
+Tab press in search field: complete with matching column name if starts with "["
 
 **Search**
 

@@ -1,10 +1,11 @@
 from PyQt5 import QtWidgets
 from PyQt5.QtCore import Qt
-from PyQt5.QtWidgets import QVBoxLayout, QComboBox, QLineEdit, QHBoxLayout, QAbstractItemView
+from PyQt5.QtWidgets import QVBoxLayout, QComboBox, QHBoxLayout, QAbstractItemView
 from PyQt5.QtWidgets import QWidget
 
 from src.filtering import filter_by_query
 from src.gui.dataframe_model import DataFrameModel
+from src.gui.search_field import SearchField
 
 
 class Table(QWidget):
@@ -19,7 +20,7 @@ class Table(QWidget):
         self.table_view.setObjectName("tableView")
         self.grouping_option_selector = QComboBox()
         self.grouping_option_selector.addItems(self.grouping_options)
-        self.filter_line = QLineEdit(self)
+        self.filter_line = SearchField(self, options=data.columns.tolist())
         self.header = self.table_view.horizontalHeader()
         self.group_by = None
         self.table_data = None
@@ -70,10 +71,10 @@ class Table(QWidget):
         self.query = self.filter_line.text()
         try:
             self.filtered_data = filter_by_query(self.data, self.query)
-            self._set_filter_line_background_white()
+            self.filter_line.set_white_background()
         except Exception as e:
             print(e)
-            self._set_filter_line_background_red()
+            self.filter_line.set_red_background()
 
         self._group_data()
         self._render_table()
@@ -104,15 +105,3 @@ class Table(QWidget):
         if self.table_data is not None:
             model = DataFrameModel(self.table_data)
             self.table_view.setModel(model)
-
-    def _set_filter_line_background_red(self):
-        self.filter_line.setStyleSheet("QLineEdit"
-                                       "{"
-                                       "background : red;"
-                                       "}")
-
-    def _set_filter_line_background_white(self):
-        self.filter_line.setStyleSheet("QLineEdit"
-                                       "{"
-                                       "background : white;"
-                                       "}")
