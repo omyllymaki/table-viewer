@@ -48,4 +48,4 @@ See query_examples.py file for more examples.
 
 ## Demo
 
-![](demo.gif)
+![](demo/demo.gif)
