@@ -5,6 +5,14 @@ import pandas as pd
 from pandas.core.dtypes.common import is_string_dtype
 
 
+class InvalidColumnName(Exception):
+    pass
+
+
+class InvalidLogicalOperator(Exception):
+    pass
+
+
 def filter_by_query(df: pd.DataFrame, query: str) -> pd.DataFrame:
     """
     Query syntax:
@@ -52,7 +60,7 @@ def filter_by_query(df: pd.DataFrame, query: str) -> pd.DataFrame:
                 if cc in all_cols:
                     cols.append(cc)
                 else:
-                    raise Exception(f"{cc} is not a valid column. Please modify query.")
+                    raise InvalidColumnName(f"{cc} is not a valid column. Please modify query.")
 
         mask = np.column_stack([df[col].str.contains(search_pattern, na=False, flags=re.IGNORECASE)
                                 for col in cols
@@ -71,7 +79,7 @@ def filter_by_query(df: pd.DataFrame, query: str) -> pd.DataFrame:
             elif operation == "&&":
                 is_match = is_match & boolean_vector
             else:
-                raise Exception(f"Unknown logical operator: {operation}")
+                raise InvalidLogicalOperator(f"Unknown logical operator: {operation}")
 
     df_filtered = df[is_match]
     return df_filtered
