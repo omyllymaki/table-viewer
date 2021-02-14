@@ -20,6 +20,7 @@ class Table(QWidget):
         self.table_view.setObjectName("tableView")
         self.grouping_option_selector = QComboBox()
         self.grouping_option_selector.addItems(self.grouping_options)
+        self.grouping_option_selector.setVisible(False)
         self.filter_line = SearchField(self, options=data.columns.tolist())
         self.header = self.table_view.horizontalHeader()
         self.group_by = None
@@ -92,10 +93,12 @@ class Table(QWidget):
     def _group_data(self):
         if self.group_by is None:
             self.table_data = self.filtered_data.copy()
+            self.grouping_option_selector.setVisible(False)
         else:
             self.table_data = self.filtered_data \
                 .groupby(self.group_by, as_index=False) \
                 .agg(self.grouping_function)
+            self.grouping_option_selector.setVisible(True)
 
     def _sort_table(self):
         sort_col_name = self.table_data.columns[self.sort_col_index]
