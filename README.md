@@ -46,3 +46,6 @@ Looks pattern "tam*" from columns [Lives, Born] or pattern "fin" from columns [N
 
 See query_examples.py file for more examples.
 
+## Demo
+
+![](demo.gif)
