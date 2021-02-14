@@ -24,11 +24,10 @@ python main.py -h
 
 ## GUI operations
 
-Left click header: sort by column
-
-Right click header: group by column or reverse grouping
-
-Tab press in search field: complete with matching column name if starts with "["
+- Left click header: sort by column
+- Right click header: group by column or reverse grouping
+- Right click cell: add cell content as search criteria
+- Tab press in search field: complete with matching column name if starts with "["
 
 **Search**
 

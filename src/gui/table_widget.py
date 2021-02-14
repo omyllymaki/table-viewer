@@ -54,6 +54,20 @@ class Table(QWidget):
         self.header.customContextMenuRequested.connect(self._handle_header_right_clicked)
         self.header.setSelectionMode(QAbstractItemView.SingleSelection)
 
+        self.table_view.setContextMenuPolicy(Qt.CustomContextMenu)
+        self.table_view.customContextMenuRequested.connect(self._handle_cell_right_clicked)
+
+    def _handle_cell_right_clicked(self, position):
+        index = self.header.logicalIndexAt(position)
+        column_name = self.table_data.columns[index]
+        content = self.table_view.indexAt(position).data()
+        current_search_text = self.filter_line.text()
+        add_text = f"[{column_name}] {content}"
+        if len(current_search_text) > 0:
+            add_text = " " + add_text
+        self.filter_line.setText(current_search_text + add_text)
+        self._handle_filtering_changed()
+
     def _handle_header_right_clicked(self, position):
         index = self.header.logicalIndexAt(position)
         if self.group_by is None:
